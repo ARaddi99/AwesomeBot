@@ -14,7 +14,7 @@ namespace AwesomeBot
     class Program
     {
         public static void Main(string[] args) => new Program().Start().GetAwaiter().GetResult();
-
+        
         private DiscordSocketClient _client;
         private CommandService _commands;
         private IServiceProvider _services;
@@ -22,6 +22,7 @@ namespace AwesomeBot
 
         public async Task Start()
         {
+            Console.Title = "AwesomeBot";
             _client = new DiscordSocketClient();
             _commands = new CommandService();
             _audio = new AudioService();

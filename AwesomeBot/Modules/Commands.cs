@@ -173,6 +173,7 @@ namespace AwesomeBot.Modules
         }
 
         [Command("punish")]
+        [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task PunishUser(SocketGuildUser user)
         {
             if (Context.Client.GetUser(user.Id) != null)
@@ -180,6 +181,23 @@ namespace AwesomeBot.Modules
                 await user.KickAsync("Sei stato punito!");
                 await ReplyAsync($"{user.Username} è stato punito!");
             }
+        }
+
+        [Command("invite")]
+        public async Task CreateInvite()
+        {
+            const string invite = "https://discord.gg/3NUvHMa";
+            await Context.User.SendMessageAsync($"Ecco il tuo invito: \n{invite}");
+        }
+
+        [Command("fede")]
+        public async Task MuteFederico()
+        {
+            var user = Context.Guild.GetUser(247041061061525504);
+            var message = await Context.Channel.GetMessagesAsync(1).Flatten();
+            await user.ModifyAsync(x => x.Mute = true);
+            await Context.Channel.DeleteMessagesAsync(message);
+            await user.SendMessageAsync($"Sei stato mutato perchè hai rotto il cazzo a {Context.User.Username}");
         }
     }
 }
