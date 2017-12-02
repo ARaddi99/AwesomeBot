@@ -197,7 +197,17 @@ namespace AwesomeBot.Modules
             var message = await Context.Channel.GetMessagesAsync(1).Flatten();
             await user.ModifyAsync(x => x.Mute = true);
             await Context.Channel.DeleteMessagesAsync(message);
-            await user.SendMessageAsync($"Sei stato mutato perchè hai rotto il cazzo a {Context.User.Username}");
+            await user.SendMessageAsync($"Sei stato mutato perchè hai trivellato il cazzo a {Context.User.Username}");
+        }
+
+        [Command("pshale")]
+        public async Task KickAlessandro()
+        {
+            const int delay = 3000;
+            var user = Context.Guild.GetUser(246926744907415553);
+            await ReplyAsync($"{user.Mention} ha frantumato i coglioni peggio di una frantumatrice meccanica");
+            await Task.Delay(delay);
+            await user.KickAsync();
         }
     }
 }
