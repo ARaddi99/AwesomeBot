@@ -99,11 +99,17 @@ namespace AwesomeBot.Modules
                 var _role = Context.Guild.Roles.FirstOrDefault(x => x.Name == role.ToUpper());
                 if (Context.User.Id != 246985081246318594)
                     if (!_role.Permissions.MoveMembers && !_role.Permissions.KickMembers && !_role.Permissions.BanMembers && !_role.Permissions.MuteMembers && !_role.Permissions.DeafenMembers && !_role.Permissions.Administrator)
+                    {
                         await (user as IGuildUser).AddRoleAsync(_role);
+                        await ReplyAsync($"{Context.User.Username}, adesso hai il ruolo: {_role.Name}");
+                    }
                     else
                         await ReplyAsync($"{Context.User.Mention}, non hai i permessi per farlo!", true);
                 else
+                {
                     await (user as IGuildUser).AddRoleAsync(_role);
+                    await ReplyAsync($"{Context.User.Username}, adesso hai il ruolo: {_role.Name}");
+                }
             }
         }
 
@@ -208,6 +214,12 @@ namespace AwesomeBot.Modules
             await ReplyAsync($"{user.Mention} ha frantumato i coglioni peggio di una frantumatrice meccanica");
             await Task.Delay(delay);
             await user.KickAsync();
+        }
+
+        [Command("nessuno")]
+        public async Task Nessuno()
+        {
+            await ReplyAsync("Loris non è nessuno per avere un comando personalizzato..");
         }
     }
 }
