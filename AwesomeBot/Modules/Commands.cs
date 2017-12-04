@@ -23,92 +23,110 @@ namespace AwesomeBot.Modules
         [Command("yay")]
         public async Task PingAsync(SocketGuildUser user)
         {
-            await ReplyAsync(user.Mention + " è un coglione!");
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                await ReplyAsync(user.Mention + " è un coglione!");
+            }
         }
 
         [Command("poke_user")]
         public async Task PokeUser(SocketGuildUser user)
         {
-            await ReplyAsync($"{ user.Mention }, sei stato pokkato!", true);
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                await ReplyAsync($"{ user.Mention }, sei stato pokkato!", true);
+            }
         }
 
         [Command("rng")]
         public async Task Rng(int min, int max)
         {
-            Random rnd = new Random();
-            int rng = rnd.Next(min, max);
-            await ReplyAsync($"{ Context.User.Mention } => Random number: " + rng.ToString());
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                Random rnd = new Random();
+                int rng = rnd.Next(min, max);
+                await ReplyAsync($"{ Context.User.Mention } => Random number: " + rng.ToString());
+            }
         }
 
         [Command("help")]
         public async Task Help()
         {
-            EmbedBuilder builder = new EmbedBuilder()
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                EmbedBuilder builder = new EmbedBuilder()
                 .WithTitle("Help")
                 .WithDescription("Questi sono i comandi che puoi usare:")
                 .WithColor(new Color(237, 224, 40));
-            foreach (var module in _services.Modules)
-            {
-                string description = null;
-                foreach (var cmd in module.Commands)
+                foreach (var module in _services.Modules)
                 {
-                    var result = await cmd.CheckPreconditionsAsync(Context);
-                    if (result.IsSuccess)
-                        description += $".!{cmd.Aliases.First()}\n";
-                }
-
-                if (!string.IsNullOrWhiteSpace(description))
-                {
-                    builder.AddField(x =>
+                    string description = null;
+                    foreach (var cmd in module.Commands)
                     {
-                        x.Name = module.Name;
-                        x.Value = description;
-                        x.IsInline = false;
-                    });
+                        var result = await cmd.CheckPreconditionsAsync(Context);
+                        if (result.IsSuccess)
+                            description += $".!{cmd.Aliases.First()}\n";
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(description))
+                    {
+                        builder.AddField(x =>
+                        {
+                            x.Name = module.Name;
+                            x.Value = description;
+                            x.IsInline = false;
+                        });
+                    }
                 }
+                await ReplyAsync("", false, builder.Build());
             }
-            await ReplyAsync("", false, builder.Build());
         }
 
         [Command("roles")]
         public async Task ShowRoles()
         {
-            int index = 1;
-            string users = string.Empty;
-            EmbedBuilder builder = new EmbedBuilder()
-                .WithTitle("Ruoli")
-                .WithDescription("Ecco i ruoli presenti:")
-                .WithColor(new Color(255, 170, 86));
-            foreach (var role in Context.Guild.Roles)
+            if (CanUse((SocketGuildUser)Context.User))
             {
-                if (!string.IsNullOrWhiteSpace(role.Name))
+                int index = 1;
+                string users = string.Empty;
+                EmbedBuilder builder = new EmbedBuilder()
+                    .WithTitle("Ruoli")
+                    .WithDescription("Ecco i ruoli presenti:")
+                    .WithColor(new Color(255, 170, 86));
+                foreach (var role in Context.Guild.Roles)
                 {
-                    builder.AddField(index.ToString(), $"** {role} **");
-                    index++;
+                    if (!string.IsNullOrWhiteSpace(role.Name))
+                    {
+                        builder.AddField(index.ToString(), $"** {role} **");
+                        index++;
+                    }
                 }
+                await ReplyAsync("", false, builder.Build());
             }
-            await ReplyAsync("", false, builder.Build());
         }
 
         [Command("addrole")]
         public async Task AutoRole(string role)
         {
-            var user = Context.User;
-            if (Context.Channel.Name == "roles")
+            if (CanUse((SocketGuildUser)Context.User))
             {
-                var _role = Context.Guild.Roles.FirstOrDefault(x => x.Name == role.ToUpper());
-                if (Context.User.Id != 246985081246318594)
-                    if (!_role.Permissions.MoveMembers && !_role.Permissions.KickMembers && !_role.Permissions.BanMembers && !_role.Permissions.MuteMembers && !_role.Permissions.DeafenMembers && !_role.Permissions.Administrator)
+                var user = Context.User;
+                if (Context.Channel.Name == "roles")
+                {
+                    var _role = Context.Guild.Roles.FirstOrDefault(x => x.Name == role.ToUpper());
+                    if (Context.User.Id != 246985081246318594)
+                        if (!_role.Permissions.MoveMembers && !_role.Permissions.KickMembers && !_role.Permissions.BanMembers && !_role.Permissions.MuteMembers && !_role.Permissions.DeafenMembers && !_role.Permissions.Administrator)
+                        {
+                            await (user as IGuildUser).AddRoleAsync(_role);
+                            await ReplyAsync($"{Context.User.Username}, adesso hai il ruolo: {_role.Name}");
+                        }
+                        else
+                            await ReplyAsync($"{Context.User.Mention}, non hai i permessi per farlo!", true);
+                    else
                     {
                         await (user as IGuildUser).AddRoleAsync(_role);
                         await ReplyAsync($"{Context.User.Username}, adesso hai il ruolo: {_role.Name}");
                     }
-                    else
-                        await ReplyAsync($"{Context.User.Mention}, non hai i permessi per farlo!", true);
-                else
-                {
-                    await (user as IGuildUser).AddRoleAsync(_role);
-                    await ReplyAsync($"{Context.User.Username}, adesso hai il ruolo: {_role.Name}");
                 }
             }
         }
@@ -142,12 +160,15 @@ namespace AwesomeBot.Modules
         [Command("spam", RunMode = RunMode.Async)]
         public async Task Spam(SocketGuildUser user, int times)
         {
-            string msg = string.Empty;
-            for (int i = 0; i < times; i++)
+            if (CanUse((SocketGuildUser)Context.User))
             {
-                msg += user.Mention + " ";
+                string msg = string.Empty;
+                for (int i = 0; i < times; i++)
+                {
+                    msg += user.Mention + " ";
+                }
+                await ReplyAsync(msg, true);
             }
-            await ReplyAsync(msg, true);
         }
 
         [Command("purge", RunMode = RunMode.Async)]
@@ -166,15 +187,18 @@ namespace AwesomeBot.Modules
         [Command("mute")]
         public async Task FakeMute(SocketGuildUser userMuted)
         {
-            SocketGuildUser user = (SocketGuildUser)Context.User;
-            if (Context.Client.GetUser(userMuted.Id) != null)
+            if (CanUse((SocketGuildUser)Context.User))
             {
-                await user.ModifyAsync(x => x.Mute = true);
-                await ReplyAsync($"{Context.User.Mention} non si muta {userMuted.Mention}!");
-            }
-            else
-            {
-                await ReplyAsync($"{Context.User.Mention}, l'utente non esiste!");
+                SocketGuildUser user = (SocketGuildUser)Context.User;
+                if (Context.Client.GetUser(userMuted.Id) != null)
+                {
+                    await user.ModifyAsync(x => x.Mute = true);
+                    await ReplyAsync($"{Context.User.Mention} non si muta {userMuted.Mention}!");
+                }
+                else
+                {
+                    await ReplyAsync($"{Context.User.Mention}, l'utente non esiste!");
+                }
             }
         }
 
@@ -199,27 +223,68 @@ namespace AwesomeBot.Modules
         [Command("fede")]
         public async Task MuteFederico()
         {
-            var user = Context.Guild.GetUser(247041061061525504);
-            var message = await Context.Channel.GetMessagesAsync(1).Flatten();
-            await user.ModifyAsync(x => x.Mute = true);
-            await Context.Channel.DeleteMessagesAsync(message);
-            await user.SendMessageAsync($"Sei stato mutato perchè hai trivellato il cazzo a {Context.User.Username}");
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                var user = Context.Guild.GetUser(247041061061525504);
+                var message = await Context.Channel.GetMessagesAsync(1).Flatten();
+                await user.ModifyAsync(x => x.Mute = true);
+                await Context.Channel.DeleteMessagesAsync(message);
+                await user.SendMessageAsync($"Sei stato mutato perchè hai trivellato il cazzo a {Context.User.Username}");
+            }
         }
 
         [Command("pshale")]
         public async Task KickAlessandro()
         {
-            const int delay = 3000;
-            var user = Context.Guild.GetUser(246926744907415553);
-            await ReplyAsync($"{user.Mention} ha frantumato i coglioni peggio di una frantumatrice meccanica");
-            await Task.Delay(delay);
-            await user.KickAsync();
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                const int delay = 3000;
+                var user = Context.Guild.GetUser(246926744907415553);
+                await ReplyAsync($"{user.Mention} ha frantumato i coglioni peggio di una frantumatrice meccanica");
+                await Task.Delay(delay);
+                await user.KickAsync();
+            }
         }
 
         [Command("nessuno")]
         public async Task Nessuno()
         {
             await ReplyAsync("Loris non è nessuno per avere un comando personalizzato..");
+        }
+
+        [Command("ritardato")]
+        public async Task Unmute()
+        {
+            SocketGuildUser user = (SocketGuildUser)Context.User;
+            if (user.IsMuted)
+                await user.ModifyAsync(x => x.Mute = false);
+            else
+            {
+                await user.ModifyAsync(x => x.Mute = true);
+                await ReplyAsync("Allora farai meglio a stare zitto.. :face_palm:");
+            }
+        }
+
+        [Command("norole")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        public async Task RemoveRole(string role, SocketGuildUser user)
+        {
+            foreach (var ruolo in Context.Guild.Roles)
+            {
+                if(ruolo.Name.Equals(role))
+                    await user.RemoveRoleAsync(Context.Guild.GetRole(ruolo.Id));
+            }
+            await ReplyAsync("Ruolo non trovato");
+        }
+        public bool CanUse(SocketGuildUser user)
+        {
+            var ruoli = user.Roles.Select(x => x.Name).ToList();
+            foreach (var ruolo in ruoli)
+            {
+                if (ruolo.Equals("supah"))
+                    return true;
+            }
+            return false;
         }
     }
 }
