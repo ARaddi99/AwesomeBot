@@ -269,13 +269,31 @@ namespace AwesomeBot.Modules
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task RemoveRole(string role, SocketGuildUser user)
         {
+            int counter = 0;
             foreach (var ruolo in Context.Guild.Roles)
             {
-                if(ruolo.Name.Equals(role))
+                if (ruolo.Name.Equals(role.ToUpper()))
                     await user.RemoveRoleAsync(Context.Guild.GetRole(ruolo.Id));
+                else
+                    counter++;
             }
-            await ReplyAsync("Ruolo non trovato");
+            if (counter == Context.Guild.Roles.Count)
+                await ReplyAsync("Ruolo non trovato");
+            else
+                await ReplyAsync("Ruolo rimosso");
         }
+
+        [Command("move")]
+        public async Task ChangeChannel(SocketGuildUser user, SocketGuildChannel channel)
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                Optional<ulong> id = channel.Id;
+                await user.ModifyAsync(x => x.ChannelId = id);
+                await ReplyAsync("Utente spostato! :thumbsup:");
+            }
+        }
+
         public bool CanUse(SocketGuildUser user)
         {
             var ruoli = user.Roles.Select(x => x.Name).ToList();
