@@ -27,6 +27,10 @@ namespace AwesomeBot.Modules
             {
                 await ReplyAsync(user.Mention + " è un coglione!");
             }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
         [Command("poke_user")]
@@ -35,6 +39,10 @@ namespace AwesomeBot.Modules
             if (CanUse((SocketGuildUser)Context.User))
             {
                 await ReplyAsync($"{ user.Mention }, sei stato pokkato!", true);
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
             }
         }
 
@@ -46,6 +54,10 @@ namespace AwesomeBot.Modules
                 Random rnd = new Random();
                 int rng = rnd.Next(min, max);
                 await ReplyAsync($"{ Context.User.Mention } => Random number: " + rng.ToString());
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
             }
         }
 
@@ -80,6 +92,10 @@ namespace AwesomeBot.Modules
                 }
                 await ReplyAsync("", false, builder.Build());
             }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
         [Command("roles")]
@@ -102,6 +118,10 @@ namespace AwesomeBot.Modules
                     }
                 }
                 await ReplyAsync("", false, builder.Build());
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
             }
         }
 
@@ -128,6 +148,10 @@ namespace AwesomeBot.Modules
                         await ReplyAsync($"{Context.User.Username}, adesso hai il ruolo: {_role.Name}");
                     }
                 }
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
             }
         }
 
@@ -169,6 +193,10 @@ namespace AwesomeBot.Modules
                 }
                 await ReplyAsync(msg, true);
             }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
         [Command("purge", RunMode = RunMode.Async)]
@@ -176,12 +204,19 @@ namespace AwesomeBot.Modules
         [RequireBotPermission(GuildPermission.ManageMessages)]
         public async Task Purge(int number)
         {
-            var messages = await Context.Channel.GetMessagesAsync(number + 1).Flatten();
-            await Context.Channel.DeleteMessagesAsync(messages);
-            const int delay = 5000;
-            var msg = await ReplyAsync($"{number} messaggi eliminati! Questo messaggio verrà eliminato tra {delay / 1000} secondi");
-            await Task.Delay(delay);
-            await msg.DeleteAsync();
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                var messages = await Context.Channel.GetMessagesAsync(number + 1).Flatten();
+                await Context.Channel.DeleteMessagesAsync(messages);
+                const int delay = 5000;
+                var msg = await ReplyAsync($"{number} messaggi eliminati! Questo messaggio verrà eliminato tra {delay / 1000} secondi");
+                await Task.Delay(delay);
+                await msg.DeleteAsync();
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
         [Command("mute")]
@@ -200,16 +235,27 @@ namespace AwesomeBot.Modules
                     await ReplyAsync($"{Context.User.Mention}, l'utente non esiste!");
                 }
             }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
         [Command("punish")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task PunishUser(SocketGuildUser user)
         {
-            if (Context.Client.GetUser(user.Id) != null)
+            if (CanUse((SocketGuildUser)Context.User))
             {
-                await user.KickAsync("Sei stato punito!");
-                await ReplyAsync($"{user.Username} è stato punito!");
+                if (Context.Client.GetUser(user.Id) != null)
+                {
+                    await user.KickAsync("Sei stato punito!");
+                    await ReplyAsync($"{user.Username} è stato punito!");
+                }
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
             }
         }
 
@@ -231,6 +277,10 @@ namespace AwesomeBot.Modules
                 await Context.Channel.DeleteMessagesAsync(message);
                 await user.SendMessageAsync($"Sei stato mutato perchè hai trivellato il cazzo a {Context.User.Username}");
             }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
         [Command("pshale")]
@@ -243,6 +293,10 @@ namespace AwesomeBot.Modules
                 await ReplyAsync($"{user.Mention} ha frantumato i coglioni peggio di una frantumatrice meccanica");
                 await Task.Delay(delay);
                 await user.KickAsync();
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
             }
         }
 
@@ -257,7 +311,10 @@ namespace AwesomeBot.Modules
         {
             SocketGuildUser user = (SocketGuildUser)Context.User;
             if (user.IsMuted)
+            {
                 await user.ModifyAsync(x => x.Mute = false);
+                await ReplyAsync("Va beh, per mutarti da solo effettivamente.. :facepalm:");
+            }
             else
             {
                 await user.ModifyAsync(x => x.Mute = true);
@@ -269,21 +326,28 @@ namespace AwesomeBot.Modules
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task RemoveRole(string role, SocketGuildUser user)
         {
-            int counter = 0;
-            foreach (var ruolo in Context.Guild.Roles)
+            if (CanUse((SocketGuildUser)Context.User))
             {
-                if (ruolo.Name.Equals(role.ToUpper()))
-                    await user.RemoveRoleAsync(Context.Guild.GetRole(ruolo.Id));
+                int counter = 0;
+                foreach (var ruolo in Context.Guild.Roles)
+                {
+                    if (ruolo.Name.Equals(role.ToUpper()))
+                        await user.RemoveRoleAsync(Context.Guild.GetRole(ruolo.Id));
+                    else
+                        counter++;
+                }
+                if (counter == Context.Guild.Roles.Count)
+                    await ReplyAsync("Ruolo non trovato");
                 else
-                    counter++;
+                    await ReplyAsync("Ruolo rimosso");
             }
-            if (counter == Context.Guild.Roles.Count)
-                await ReplyAsync("Ruolo non trovato");
             else
-                await ReplyAsync("Ruolo rimosso");
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
-        [Command("move")]
+        [Command("move", RunMode = RunMode.Async)]
         public async Task ChangeChannel(SocketGuildUser user, SocketGuildChannel channel)
         {
             if (CanUse((SocketGuildUser)Context.User))
@@ -292,14 +356,112 @@ namespace AwesomeBot.Modules
                 await user.ModifyAsync(x => x.ChannelId = id);
                 await ReplyAsync("Utente spostato! :thumbsup:");
             }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
         }
 
+        [Command("afk", RunMode = RunMode.Async)]
+        public async Task UserAFK(SocketGuildUser user)
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                List<SocketVoiceChannel> list = Context.Guild.VoiceChannels.Where(x => x.Name.Equals("Afk")).ToList();
+                Optional<ulong> id = list[0].Id;
+                await user.ModifyAsync(x => x.ChannelId = id);
+                var message = await Context.Channel.GetMessagesAsync(1).Flatten();
+                await Context.Channel.DeleteMessagesAsync(message);
+                await ReplyAsync($"{user} è adesso AFK");
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
+        }
+
+        [RequireUserPermission(GuildPermission.MoveMembers)]
+        [Command("fck", RunMode = RunMode.Async)]
+        public async Task BannedFromChannel(SocketGuildUser user)
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                foreach (var role in Context.Guild.Roles)
+                {
+                    if (role.Name.Equals("FCK"))
+                    {
+                        await user.AddRoleAsync(role);
+                        break;
+                    }
+                }
+                await user.ModifyAsync(x => x.ChannelId = 388751938860220417);
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
+        }
+
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Command("removetoall", RunMode = RunMode.Async)]
+        public async Task RemoveAllRole(string ruolo)
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                foreach (var role in Context.Guild.Roles)
+                {
+                    if (role.Name.Equals(ruolo.ToUpper()))
+                    {
+                        foreach (var user in Context.Guild.Users)
+                        {
+                            await user.RemoveRoleAsync(role);
+                        }
+                    }
+                }
+                await ReplyAsync("Terminato :thumbsup:");
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
+        }
+
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Command("givetoall", RunMode = RunMode.Async)]
+        public async Task GiveAllRole(string ruolo)
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                List<SocketGuildUser> users = new List<SocketGuildUser>();
+                List<ulong> ids = new List<ulong>() { 246985081246318594, 246926744907415553, 246981885132013568, 247041061061525504, 246736207034318849, 262623537548886019 };
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    users.Add(Context.Guild.GetUser(ids[i]));
+                }
+
+                foreach (var role in Context.Guild.Roles)
+                {
+                    if (role.Name.Equals(ruolo.ToUpper()))
+                    {
+                        foreach (var user in users)
+                        {
+                            await user.AddRoleAsync(role);
+                        }
+                    }
+                }
+                await ReplyAsync("Terminato :thumbsup:");
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
+        }
         public bool CanUse(SocketGuildUser user)
         {
             var ruoli = user.Roles.Select(x => x.Name).ToList();
             foreach (var ruolo in ruoli)
             {
-                if (ruolo.Equals("supah"))
+                if (ruolo.Equals("SUPAH"))
                     return true;
             }
             return false;
