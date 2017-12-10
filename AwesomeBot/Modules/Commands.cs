@@ -456,6 +456,29 @@ namespace AwesomeBot.Modules
                 await ReplyAsync("Non hai i permessi per farlo");
             }
         }
+
+        [Command("lane", RunMode = RunMode.Async)]
+        public async Task ChooseLane(SocketGuildUser user, SocketGuildUser user2, SocketGuildUser user3, SocketGuildUser user4, SocketGuildUser user5)
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                List<SocketGuildUser> List = new List<SocketGuildUser>() { user, user2, user3, user4, user5 };
+                List<string> Lanes = new List<string>() { "Top", "Jungle", "Mid", "Adc", "Support" };
+                Random random = new Random();
+                int rnd;
+                for (int i = 0; i < List.Count; i++)
+                {
+                    rnd = random.Next(0, Lanes.Count);
+                    await ReplyAsync(List[i].Username + " - " + Lanes[rnd]);
+                    Lanes.Remove(Lanes[rnd]);
+                }
+            }
+            else
+            {
+                await ReplyAsync("Non hai i permessi per farlo");
+            }
+        }
+
         public bool CanUse(SocketGuildUser user)
         {
             var ruoli = user.Roles.Select(x => x.Name).ToList();

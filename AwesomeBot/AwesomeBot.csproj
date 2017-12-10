@@ -98,6 +98,9 @@
   <ItemGroup>
     <Compile Include="Modules\AudioService.cs" />
     <Compile Include="Modules\Commands.cs" />
+    <Compile Include="Modules\Data.cs" />
+    <Compile Include="Modules\Mini-Game.cs" />
+    <Compile Include="Modules\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
