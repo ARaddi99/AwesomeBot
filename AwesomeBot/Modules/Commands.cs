@@ -11,13 +11,13 @@ namespace AwesomeBot.Modules
     public class Commands : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _services;
-        private readonly AudioService _audio;
+        //private readonly AudioService _audio;
 
-        public Commands(CommandService services, AudioService audio)
-        {
-            _services = services;
-            _audio = audio;
-        }
+        //public Commands(CommandService services, AudioService audio)
+        //{
+        //    _services = services;
+        //    _audio = audio;
+        //}
 
 
         [Command("yay")]
@@ -477,6 +477,34 @@ namespace AwesomeBot.Modules
             {
                 await ReplyAsync("Non hai i permessi per farlo");
             }
+        }
+
+        [Command("opgg", RunMode = RunMode.Async)]
+        public async Task OPGG(string region, string summonerName)
+        {
+            await ReplyAsync("Ecco qua :smile::");
+            await ReplyAsync($"http://{region}.op.gg/summoner/userName={summonerName}");
+        }
+
+        [Command("lol", RunMode = RunMode.Async)]
+        public async Task MoveToLol()
+        {
+            if (CanUse((SocketGuildUser)Context.User))
+            {
+                var users = Context.Guild.Users.Where(x => x.Game.GetValueOrDefault().Name == Context.User.Game.GetValueOrDefault().Name).ToList();
+                ulong id = 292773432943312897;
+                foreach (var user in users)
+                {
+                    await user.ModifyAsync(x => x.ChannelId = id);
+                }
+                await ReplyAsync("Terminato :thumbsup:");
+            }
+        }
+
+        [Command("test")]
+        public async Task Prova()
+        {
+            await ReplyAsync(Context.User.Game.GetValueOrDefault().Name);
         }
 
         public bool CanUse(SocketGuildUser user)

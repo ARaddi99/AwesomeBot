@@ -123,6 +123,7 @@ namespace AwesomeBot.Modules
                             await ReplyAsync($"{playerOpponent.User.Username} ha già: {playerOpponent.CurrentPoints} punti");
                         }
                         locked = false;
+                        ChallengedEnded();
                     }
                 }
 
@@ -146,11 +147,11 @@ namespace AwesomeBot.Modules
                             await ReplyAsync($"{playerOpponent.User.Username} ha già: {playerOpponent.CurrentPoints} punti");
                         }
                         locked = false;
+                        ChallengedEnded();
                     }
                 }
                 Data.PlayersList.Add(playerChallenger);
                 Data.PlayersList.Add(playerOpponent);
-                ChallengedEnded();
             }
         }
 
